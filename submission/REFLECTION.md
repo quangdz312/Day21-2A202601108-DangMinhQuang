@@ -1,23 +1,23 @@
 # Reflection — Lab 21
 
-*Ngắn gọn, thành thật. Phần này chấm theo độ cụ thể, không theo độ dài.*
+_Ngắn gọn, thành thật. Phần này chấm theo độ cụ thể, không theo độ dài._
 
 **1. Điều gì làm bạn ngạc nhiên nhất?**
 
-Điều làm tôi ngạc nhiên nhất là chỉ cần tối ưu prompt, điểm target của base model đã tăng từ 0 lên 0.765 và format tăng từ 0 lên 1.0. Fine-tune tiếp tục nâng target lên 0.97, nhưng đồng thời làm regression giảm từ 0.7578 xuống 0.6111. Kết quả này cho thấy một model có thể trông rất tốt trên nhiệm vụ đích nhưng vẫn chưa đủ an toàn để triển khai.
+Điều làm tôi ngạc nhiên nhất là hiệu quả của prompt engineering. Chỉ cần chuyển từ prompt đơn giản sang prompt mô tả rõ schema và các giá trị hợp lệ, target của base model đã tăng từ 0 lên 0.765, còn format tăng từ 0 lên 1.0. Fine-tune tiếp tục nâng target lên 0.97, nhưng regression lại giảm từ 0.7578 xuống 0.6111. Kết quả này cho thấy điểm cao trên nhiệm vụ đích chưa đủ để kết luận một model có thể triển khai an toàn.
 
 **2. Bạn mất nhiều thời gian nhất ở đâu? Nó có phải chỗ bạn dự đoán không?**
 
-Tôi mất nhiều thời gian nhất ở Core pipeline, đặc biệt là NB4 với ba run đối chứng, mất 51,6 phút trong tổng 76,8 phút của lượt thử. Ban đầu tôi nghĩ phần setup môi trường và NB3 sẽ lâu nhất, nhưng NB4 mới là phần tốn thời gian vì phải train ba cấu hình riêng. Ngoài ra, tôi cũng mất thời gian phân biệt Jupyter local với Colab và xử lý xung đột package `tests` trong smoke test.
+Tôi mất nhiều thời gian nhất ở NB4 vì phải huấn luyện ba cấu hình đối chứng riêng. Phần này mất khoảng 51,6 phút trong tổng thời gian khoảng 76,8 phút của core pipeline. Ban đầu tôi nghĩ khâu chuẩn bị dữ liệu hoặc NB3 sẽ tốn thời gian nhất, nhưng thực tế phần lớn thời gian được dành cho việc chờ GPU và kiểm tra kết quả của từng cấu hình. Tôi cũng mất thêm thời gian xử lý sự khác biệt giữa Jupyter local và Google Colab.
 
 **3. Trước lab này bạn tin điều gì về fine-tuning mà giờ bạn không còn tin?**
 
-Trước lab, tôi nghĩ fine-tune chỉ cần làm điểm nhiệm vụ đích tăng là có thể xem là thành công. Sau lab, tôi không còn tin điều đó: target tăng 0.205 nhưng verdict vẫn FAILED vì năng lực chung giảm 0.147. Tôi cũng không còn xem train loss thấp hơn là bằng chứng model tốt hơn, vì `attn_only` có loss thấp hơn `correct` nhưng hai cấu hình chỉ hòa nhau ở target 0.97.
+Trước đây tôi nghĩ fine-tune có thể được xem là thành công nếu train loss giảm và điểm trên nhiệm vụ đích tăng. Sau lab này, tôi không còn tin rằng hai chỉ số đó là đủ. attn_only có train loss thấp hơn correct, nhưng cả hai cùng đạt target 0.97. Fine-tune cũng tăng target thêm 0.205 nhưng vẫn nhận verdict FAILED vì regression giảm 0.147. Vì vậy, model phải được đánh giá cả trên nhiệm vụ đích, năng lực ngoài miền, định dạng đầu ra và latency.
 
 **4. Bạn dùng AI assistant vào việc gì trong lab? Chỗ nào nó sai?**
 
-Tôi dùng AI assistant để đọc hướng dẫn repo, thiết lập môi trường Windows, phân tích log pytest, giải thích các stage NB1–NB5, kiểm tra Gatekeeper và hoàn thiện report dựa trên artefact thật. AI giúp tìm ra xung đột `tests.fake_tokenizer` trên Colab và hướng dẫn thêm `tests/__init__.py`. Tuy nhiên, ban đầu AI đề nghị tạo lại `.venv` khi Jupyter vẫn đang sử dụng môi trường đó, dẫn đến lỗi permission denied; nó cũng cần ảnh chụp màn hình mới nhận ra tôi đang dùng Jupyter local chứ không phải Google Colab. Vì vậy tôi phải kiểm tra đường dẫn Python, trạng thái runtime và log thực tế thay vì làm theo mọi đề xuất ngay lập tức.
+Tôi dùng AI assistant để đọc cấu trúc repo, giải thích mục tiêu của NB1–NB5, hỗ trợ thiết lập môi trường, phân tích log kiểm thử và đối chiếu báo cáo với các artefact. AI giúp tôi xác định một số vấn đề liên quan đến môi trường Python và cách chạy gatekeeper. Tuy nhiên, đôi lúc AI đưa ra đề xuất dựa trên giả định chưa đúng về môi trường đang chạy, chẳng hạn nhầm giữa Jupyter local và Colab hoặc đề nghị tạo lại môi trường khi nó vẫn đang được sử dụng. Vì vậy, tôi nhận ra rằng mọi đề xuất của AI đều cần được kiểm chứng bằng log, đường dẫn Python và kết quả chạy thực tế.
 
 **5. Nếu ngày mai phải fine-tune cho một khách hàng thật, bước đầu tiên bạn làm là gì?**
 
-Bước đầu tiên của tôi là cùng khách hàng định nghĩa tiêu chí thành công và đóng băng bộ đánh giá trước khi train: tập target, tập regression, format, latency và ngưỡng chấp nhận. Sau đó tôi sẽ đo ít nhất một base model với naive prompt và một prompt tối ưu để biết fine-tune có thật sự cần thiết hay không. Tôi chỉ bắt đầu chuẩn bị dữ liệu huấn luyện sau khi baseline và cổng đánh giá đã rõ ràng.
+Tôi sẽ bắt đầu bằng việc thống nhất với khách hàng về tiêu chí thành công và đóng băng bộ đánh giá trước khi huấn luyện. Bộ đánh giá phải bao gồm nhiệm vụ đích, các ca ngoài miền để phát hiện regression, yêu cầu định dạng, latency và ngưỡng chấp nhận cho từng nhóm. Sau đó tôi sẽ đo base model với cả naive prompt và optimized prompt để xác định fine-tuning có thực sự cần thiết hay không. Chỉ sau khi có baseline đáng tin cậy, tôi mới xây dựng dữ liệu train và chuẩn bị thêm replay data để hạn chế catastrophic forgetting.
